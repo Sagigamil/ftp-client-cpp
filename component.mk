@@ -6,6 +6,6 @@
 # in the build directory. This behaviour is entirely configurable,
 # please read the ESP-IDF documents if you need to do this.
 #
-COMPONENT_ADD_INCLUDEDIRS  := ftpclient-cpp/FTP
-COMPONENT_SRCDIRS := ftpclient-cpp/FTP
+COMPONENT_ADD_INCLUDEDIRS  := ftpclient/FTP
+COMPONENT_SRCDIRS := ftpclient/FTP
 CXXFLAGS := -DDEBUG_CURL -DLINUX -Wno-error=unused-value -std=c++14 -mlongcalls
