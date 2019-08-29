@@ -653,14 +653,15 @@ const bool CFTPClient::DownloadFile(const std::string& strLocalFile, const std::
 
    std::string strFile = ParseURL(strRemoteFile);
 
-   std::ofstream ofsOutput;
-   ofsOutput.open(strLocalFile, std::ofstream::out | std::ofstream::binary | std::ofstream::trunc);
+   std::cout << "opening: " << strLocalFile << std::endl;
+   // ofsOutput.open(strLocalFile, std::ofstream::out | std::ofstream::binary | std::ofstream::trunc);
+   FILE* f = fopen(strLocalFile.c_str(), "w");
 
-   if (ofsOutput)
+   if (NULL != f)
    {
       curl_easy_setopt(m_pCurlSession, CURLOPT_URL, strFile.c_str());
       curl_easy_setopt(m_pCurlSession, CURLOPT_WRITEFUNCTION, WriteToFileCallback);
-      curl_easy_setopt(m_pCurlSession, CURLOPT_WRITEDATA, &ofsOutput);
+      curl_easy_setopt(m_pCurlSession, CURLOPT_WRITEDATA, f);
 
       CURLcode res = Perform();
 
@@ -673,7 +674,8 @@ const bool CFTPClient::DownloadFile(const std::string& strLocalFile, const std::
       else
          bRet = true;
 
-      ofsOutput.close();
+      fclose(f);
+      f = NULL;
 
       if(!bRet)
          remove(strLocalFile.c_str());
@@ -1096,10 +1098,10 @@ size_t CFTPClient::WriteToFileCallback(void* buff, size_t size, size_t nmemb, vo
    if ((size == 0) || (nmemb == 0) || ((size*nmemb) < 1) || (data == nullptr))
       return 0;
 
-   std::ofstream* pFileStream = reinterpret_cast<std::ofstream*>(data);
-   if (pFileStream->is_open())
+   FILE * f = reinterpret_cast<FILE*>(data);
+   if (NULL != f)
    {
-      pFileStream->write(reinterpret_cast<char*>(buff), size * nmemb);
+      fwrite(reinterpret_cast<char*>(buff), size * nmemb, 1, f);
    }
 
    return size * nmemb;
@@ -1296,7 +1298,7 @@ int CFTPClient::DebugCallback(CURL* curl , curl_infotype curl_info_type, char* p
    std::ofstream* pofTraceFile = reinterpret_cast<std::ofstream*>(pFile);
    if (pofTraceFile == nullptr)
    {
-      std::cout << "[DEBUG] cURL debug log [" << curl_info_type << "]: " << " - " << strTrace;
+      //std::cout << "[DEBUG] cURL debug log [" << curl_info_type << "]: " << " - " << strTrace;
    }
    else
    {
